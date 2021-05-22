@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Об авторе проекта{% endblock %}
+{% block content %}
+  <div class="row">
+    <div class="col-md-3 mb-3 mt-1">
+      <div class="card">
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <div class="h3">
+                Об авторе
+              </div> 
+            </li>
+            <li class="list-group-item">
+              <div>
+                {% load static %}
+                <img src="{% static 'about_image.png' %}">
+              </div>
+            </li>
+          </ul>                                               
+        </div>                    
+      </div>                
+    </div>
+    <div class="col-md-9">
+      <div class="card-body">                    
+        <div class="card-text">
+          <p>
+            Привет! Меня зовут Виталий, я решил заняться интересным для себя
+            делом и пришёл на курс Я.Практикума бэкенд разработки. Это мой
+            первый проект на Django. И благодаря ему я многое узнал нового,
+            полезного и интересного. А благодаря курсу моя жизнь стала
+            немного разнообразнее :)
+          </p>
+        </div>                    
+      </div>                
+    </div>            
+  </div>
+{% endblock %}
