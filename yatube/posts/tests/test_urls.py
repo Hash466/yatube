@@ -78,7 +78,12 @@ class PostsURLTests(TestCase):
              reverse('post', args=(username, post_id))),
             ('post_edit', (username, post_id), guest_client,
              (reverse('login') + '?next=' + reverse('post_edit',
-                                                    args=(username, post_id))))
+                                                    args=(username, post_id)))
+             ),
+            ('add_comment', (username, post_id), guest_client,
+             (reverse('login') + '?next=' + reverse('add_comment',
+                                                    args=(username, post_id)))
+             ),
         )
 
         for (get_name, rev_args, client_obj,
@@ -86,3 +91,8 @@ class PostsURLTests(TestCase):
             with self.subTest():
                 response = client_obj.get(reverse(get_name, args=rev_args))
                 self.assertRedirects(response, redirect_url)
+
+    def test_http_status_404(self):
+        """Ожидаемая ошибка 404 при запросе несуществующего URL."""
+        response = self.client.get('/7у6еа7у6еа76у7к6а/')
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
