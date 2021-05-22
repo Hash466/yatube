@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import response
 from django.test import Client, override_settings, TestCase
 from django.urls import reverse
 
@@ -211,8 +210,7 @@ class PostsViewTests(TestCase):
         follow_client.get(reverse(
             'profile_follow',
             kwargs={'username': PostsViewTests.test_user.username}
-            )
-        )
+        ))
         self.assertTrue(Follow.objects.filter(
             user=test_follow_user, author=PostsViewTests.test_user,
         ).exists())
@@ -220,8 +218,7 @@ class PostsViewTests(TestCase):
         follow_client.get(reverse(
             'profile_unfollow',
             kwargs={'username': PostsViewTests.test_user.username}
-            )
-        )
+        ))
         self.assertFalse(Follow.objects.filter(
             user=test_follow_user, author=PostsViewTests.test_user,
         ).exists())
@@ -246,6 +243,5 @@ class PostsViewTests(TestCase):
         follow_client.get(reverse(
             'profile_follow',
             kwargs={'username': PostsViewTests.test_user.username}
-            )
-        )
+        ))
         run_test(1)
