@@ -51,7 +51,7 @@ def profile(request, username):
     page = get_paginator_page(request, posts)
 
     following = False
-    if request.user.is_authenticated and request.user.username != username:
+    if request.user.is_authenticated:
         following = Follow.objects.filter(
             user=request.user, author=author
         ).exists()
@@ -118,7 +118,7 @@ def server_error(request):
 
 @login_required
 def add_comment(request, username, post_id):
-    post = get_object_or_404(Post, pk=post_id)
+    post = get_object_or_404(Post, pk=post_id, author__username=username)
     form = CommentForm(request.POST or None)
 
     if form.is_valid():
@@ -126,9 +126,8 @@ def add_comment(request, username, post_id):
         new_comment.author = post.author
         new_comment.post = post
         new_comment.save()
-        return redirect("post", username, post_id)
 
-    return render(request, "posts/comments.html", {"form": form})
+    return redirect("post", username, post_id)
 
 
 @login_required
@@ -151,6 +150,6 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    following = get_object_or_404(Follow, user=request.user, author=author)
+    following = Follow.objects.filter(user=request.user, author=author)
     following.delete()
     return redirect("profile", username=username)

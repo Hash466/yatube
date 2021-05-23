@@ -197,51 +197,75 @@ class PostsViewTests(TestCase):
         resp_after = self.authorized_client.get(reverse('index')).content
         self.assertNotEqual(resp_initial, resp_after)
 
-    def test_follow_applied_and_not_applied(self):
-        """Подписка применяестя и отменяется корректно"""
+    def test_follow_applied(self):
+        """Подписка применяестя корректно"""
         test_follow_user = User.objects.create_user(username='follow_user')
+        author = PostsViewTests.test_user
         follow_client = Client()
         follow_client.force_login(test_follow_user)
 
-        self.assertFalse(Follow.objects.filter(
-            user=test_follow_user, author=PostsViewTests.test_user,
-        ).exists())
+        follow_count = Follow.objects.filter(user=test_follow_user,
+                                             author=author).count()
 
         follow_client.get(reverse(
             'profile_follow',
-            kwargs={'username': PostsViewTests.test_user.username}
+            kwargs={'username': author.username}
         ))
-        self.assertTrue(Follow.objects.filter(
-            user=test_follow_user, author=PostsViewTests.test_user,
-        ).exists())
+        self.assertEqual(follow_count + 1,
+                         Follow.objects.filter(user=test_follow_user,
+                                               author=author).count())
+
+    def test_follow_not_applied(self):
+        """Подписка отменяется корректно"""
+        test_follow_user = User.objects.create_user(username='follow_user')
+        author = PostsViewTests.test_user
+        follow_client = Client()
+        follow_client.force_login(test_follow_user)
+        Follow.objects.create(user=test_follow_user, author=author)
+
+        follow_count = Follow.objects.filter(user=test_follow_user,
+                                             author=author).count()
 
         follow_client.get(reverse(
             'profile_unfollow',
             kwargs={'username': PostsViewTests.test_user.username}
         ))
-        self.assertFalse(Follow.objects.filter(
-            user=test_follow_user, author=PostsViewTests.test_user,
-        ).exists())
+        self.assertEqual(follow_count - 1,
+                         Follow.objects.filter(user=test_follow_user,
+                                               author=author).count())
 
     def test_post_appeared_in_the_specified_follow(self):
-        """Пост появляется в ленте подписчика и его нет у други в ленте"""
+        """Пост появляется в ленте подписчика"""
         test_follow_user = User.objects.create_user(username='follow_user')
         follow_client = Client()
         follow_client.force_login(test_follow_user)
 
-        def run_test(post_count):
-            resp_follow_client = follow_client.get(reverse('follow_index'))
-            obj_follow_client = resp_follow_client.context.get('page')
-            resp_test_user = self.authorized_client.get(
-                reverse('follow_index')
-            )
-            obj_test_user = resp_test_user.context.get('page')
-            self.assertEqual(len(obj_follow_client.object_list), post_count)
-            self.assertEqual(len(obj_test_user.object_list), 0)
-
-        run_test(0)
         follow_client.get(reverse(
             'profile_follow',
             kwargs={'username': PostsViewTests.test_user.username}
         ))
-        run_test(1)
+
+        resp_follow_client = follow_client.get(reverse('follow_index'))
+        obj_follow_client = resp_follow_client.context.get('page')
+        self.authorized_client.get(reverse('follow_index'))
+        self.assertEqual(len(obj_follow_client.object_list), 1)
+        context_obj = resp_follow_client.context['page'][0]
+        self.assertEqual(context_obj.text, PostsViewTests.post.text)
+        self.assertEqual(context_obj.author, PostsViewTests.post.author)
+
+    def test_post_is_missing_outside_follow(self):
+        """Поста нет в ленте при отсутствии подписки"""
+        test_follow_user = User.objects.create_user(username='follow_user')
+        follow_client = Client()
+        follow_client.force_login(test_follow_user)
+
+        follow_client.get(reverse(
+            'profile_follow',
+            kwargs={'username': PostsViewTests.test_user.username}
+        ))
+
+        resp_test_user = self.authorized_client.get(
+            reverse('follow_index')
+        )
+        obj_test_user = resp_test_user.context.get('page')
+        self.assertEqual(len(obj_test_user.object_list), 0)

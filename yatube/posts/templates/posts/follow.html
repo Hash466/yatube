@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% load cache %}
-{% block title %} Посты @{{ page.author }} {% endblock %}
+{% block title %}Посты @{{ page.author }}{% endblock %}
 {% block content %}
-  {% cache 20 index_page page%}
+  {% load cache %}
+  {% cache 20 follow_page page %}
     <div class="container">
-      {% include "posts/menu.html" with follow=True %}
+      {% include "includes/menu.html" with follow=True %}
       {% for post in page %}
-        {% include "posts/post_item.html" with post=post %}
+        {% include "includes/post_item.html" with post=post %}
       {% endfor %}
     </div>
   {% endcache %}

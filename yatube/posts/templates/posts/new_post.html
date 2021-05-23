@@ -8,7 +8,7 @@
     <div class="col-md-8 p-5">
       <div class="card">
         <div class="card-header">
-          {{ edit|yesno:"Редактировать запись:,Добавить новую" }} запись:
+          {{ edit|yesno:"Редактировать,Добавить новую" }} запись:
         </div>
         <div class="card-body">
           {% for error in form.errors %}
