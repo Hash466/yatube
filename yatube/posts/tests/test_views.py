@@ -198,7 +198,7 @@ class PostsViewTests(TestCase):
         self.assertNotEqual(resp_initial, resp_after)
 
     def test_follow_applied(self):
-        """Подписка применяестя корректно"""
+        """Подписка применяетcя корректно."""
         test_follow_user = User.objects.create_user(username='follow_user')
         author = PostsViewTests.test_user
         follow_client = Client()
@@ -216,7 +216,7 @@ class PostsViewTests(TestCase):
                                                author=author).count())
 
     def test_follow_not_applied(self):
-        """Подписка отменяется корректно"""
+        """Подписка отменяется корректно."""
         test_follow_user = User.objects.create_user(username='follow_user')
         author = PostsViewTests.test_user
         follow_client = Client()
@@ -235,7 +235,7 @@ class PostsViewTests(TestCase):
                                                author=author).count())
 
     def test_post_appeared_in_the_specified_follow(self):
-        """Пост появляется в ленте подписчика"""
+        """Пост появляется в ленте подписчика."""
         test_follow_user = User.objects.create_user(username='follow_user')
         follow_client = Client()
         follow_client.force_login(test_follow_user)
@@ -254,7 +254,7 @@ class PostsViewTests(TestCase):
         self.assertEqual(context_obj.author, PostsViewTests.post.author)
 
     def test_post_is_missing_outside_follow(self):
-        """Поста нет в ленте при отсутствии подписки"""
+        """Поста нет в ленте при отсутствии подписки."""
         test_follow_user = User.objects.create_user(username='follow_user')
         follow_client = Client()
         follow_client.force_login(test_follow_user)

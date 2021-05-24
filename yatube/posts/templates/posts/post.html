@@ -3,7 +3,7 @@
 {% block content %}
   <div class="row">
     <div class="col-md-3 mb-3 mt-1">
-      {% include "includes/profile_item.html" with posts=author.posts.count %} 
+      {% include "includes/profile_item.html" with posts=author.posts.count is_post=True%} 
     </div>
     <div class="col-md-9">
       {% include "includes/post_item.html" with is_post=True %}

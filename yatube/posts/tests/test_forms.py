@@ -44,9 +44,10 @@ class PostCreateFormTests(TestCase):
 
     def test_create_post(self):
         """Валидная форма создает запись в Post."""
+        name_img = 'small.gif'
         posts_count = Post.objects.count()
         uploaded = SimpleUploadedFile(
-            name='small.gif',
+            name=name_img,
             content=SMALL_GIF,
             content_type='image/gif'
         )
@@ -66,7 +67,7 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(post.group, PostCreateFormTests.group)
         self.assertEqual(post.author, PostCreateFormTests.test_user)
         self.assertEqual(post.text, form_data['text'])
-        self.assertEqual(post.image.name, 'posts/small.gif')
+        self.assertEqual(post.image.name, f'posts/{name_img}')
 
     def test_edit_post(self):
         """Валидная форма редактирует запись поста."""
@@ -141,12 +142,15 @@ class PostCreateFormTests(TestCase):
                                text='абракатабра хе-хе')
         comment_count = post.comments.count()
         form_data = {'text': 'Я аноним, комментом гоним!'}
-        self.client.post(reverse('add_comment',
-                                 kwargs={
-                                     'username': author,
-                                     'post_id': post.id
-                                 }), data=form_data)
+        response = self.client.post(reverse('add_comment',
+                                            kwargs={
+                                                'username': author,
+                                                'post_id': post.id
+                                            }), data=form_data)
         self.assertEqual(comment_count, post.comments.count())
+        self.assertRedirects(response, reverse('login') + '?next=' + reverse(
+            'add_comment', kwargs={'username': author, 'post_id': post.id}
+        ))
 
     def test_user_can_comment(self):
         """Форма позволяет пользователю оставлять комментарии к постам."""

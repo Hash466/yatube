@@ -19,7 +19,7 @@
         Записей: {{ posts }}
       </div>
     </li>
-    {% if request.user != author and request.user.is_authenticated %}
+    {% if request.user != author and request.user.is_authenticated and not is_post%}
       <li class="list-group-item">
         {% if following %}
           <a class="btn btn-lg btn-light"
