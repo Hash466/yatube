@@ -204,18 +204,20 @@ class PostsViewTests(TestCase):
         follow_client = Client()
         follow_client.force_login(test_follow_user)
 
-        follow_count = Follow.objects.filter(user=test_follow_user,
-                                             author=author).count()
+        follow_count = Follow.objects.all().count()
 
         follow_client.get(reverse(
             'profile_follow',
             kwargs={'username': author.username}
         ))
-        self.assertEqual(follow_count + 1,
-                         Follow.objects.filter(user=test_follow_user,
-                                               author=author).count())
+        self.assertEqual(follow_count + 1, Follow.objects.all().count())
 
-    def test_follow_not_applied(self):
+        follow_obj = Follow.objects.filter(user=test_follow_user,
+                                           author=author)[0]
+        self.assertEqual(follow_obj.user, test_follow_user)
+        self.assertEqual(follow_obj.author, author)
+
+    def test_follow_canceled_correctly(self):
         """Подписка отменяется корректно."""
         test_follow_user = User.objects.create_user(username='follow_user')
         author = PostsViewTests.test_user
@@ -223,31 +225,25 @@ class PostsViewTests(TestCase):
         follow_client.force_login(test_follow_user)
         Follow.objects.create(user=test_follow_user, author=author)
 
-        follow_count = Follow.objects.filter(user=test_follow_user,
-                                             author=author).count()
+        follow_count = Follow.objects.all().count()
 
         follow_client.get(reverse(
             'profile_unfollow',
             kwargs={'username': PostsViewTests.test_user.username}
         ))
-        self.assertEqual(follow_count - 1,
-                         Follow.objects.filter(user=test_follow_user,
-                                               author=author).count())
+        self.assertEqual(follow_count - 1, Follow.objects.all().count())
 
     def test_post_appeared_in_the_specified_follow(self):
         """Пост появляется в ленте подписчика."""
         test_follow_user = User.objects.create_user(username='follow_user')
+        author = PostsViewTests.test_user
         follow_client = Client()
         follow_client.force_login(test_follow_user)
 
-        follow_client.get(reverse(
-            'profile_follow',
-            kwargs={'username': PostsViewTests.test_user.username}
-        ))
+        Follow.objects.create(user=test_follow_user, author=author)
 
         resp_follow_client = follow_client.get(reverse('follow_index'))
         obj_follow_client = resp_follow_client.context.get('page')
-        self.authorized_client.get(reverse('follow_index'))
         self.assertEqual(len(obj_follow_client.object_list), 1)
         context_obj = resp_follow_client.context['page'][0]
         self.assertEqual(context_obj.text, PostsViewTests.post.text)
@@ -258,11 +254,6 @@ class PostsViewTests(TestCase):
         test_follow_user = User.objects.create_user(username='follow_user')
         follow_client = Client()
         follow_client.force_login(test_follow_user)
-
-        follow_client.get(reverse(
-            'profile_follow',
-            kwargs={'username': PostsViewTests.test_user.username}
-        ))
 
         resp_test_user = self.authorized_client.get(
             reverse('follow_index')
