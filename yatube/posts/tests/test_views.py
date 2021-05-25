@@ -204,16 +204,15 @@ class PostsViewTests(TestCase):
         follow_client = Client()
         follow_client.force_login(test_follow_user)
 
-        follow_count = Follow.objects.all().count()
+        follow_count = Follow.objects.count()
 
         follow_client.get(reverse(
             'profile_follow',
             kwargs={'username': author.username}
         ))
-        self.assertEqual(follow_count + 1, Follow.objects.all().count())
+        self.assertEqual(follow_count + 1, Follow.objects.count())
 
-        follow_obj = Follow.objects.filter(user=test_follow_user,
-                                           author=author)[0]
+        follow_obj = Follow.objects.first()
         self.assertEqual(follow_obj.user, test_follow_user)
         self.assertEqual(follow_obj.author, author)
 
@@ -225,13 +224,13 @@ class PostsViewTests(TestCase):
         follow_client.force_login(test_follow_user)
         Follow.objects.create(user=test_follow_user, author=author)
 
-        follow_count = Follow.objects.all().count()
+        follow_count = Follow.objects.count()
 
         follow_client.get(reverse(
             'profile_unfollow',
             kwargs={'username': PostsViewTests.test_user.username}
         ))
-        self.assertEqual(follow_count - 1, Follow.objects.all().count())
+        self.assertEqual(follow_count - 1, Follow.objects.count())
 
     def test_post_appeared_in_the_specified_follow(self):
         """Пост появляется в ленте подписчика."""
@@ -251,10 +250,6 @@ class PostsViewTests(TestCase):
 
     def test_post_is_missing_outside_follow(self):
         """Поста нет в ленте при отсутствии подписки."""
-        test_follow_user = User.objects.create_user(username='follow_user')
-        follow_client = Client()
-        follow_client.force_login(test_follow_user)
-
         resp_test_user = self.authorized_client.get(
             reverse('follow_index')
         )
