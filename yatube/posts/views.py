@@ -18,7 +18,7 @@ def get_paginator_page(request, objects):
 
 
 def index(request):
-    posts = Post.objects.all()
+    posts = Post.objects.prefetch_related("author").prefetch_related("group").all()
     page = get_paginator_page(request, posts)
     return render(request, "posts/index.html", {"page": page})
 
